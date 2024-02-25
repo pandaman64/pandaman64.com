@@ -22,7 +22,6 @@ const Link = ({
 };
 
 export default createRoute((c) => {
-  const name = c.req.query("name") ?? "Hono";
   return c.render(
     <div className="min-h-screen">
       <div>
@@ -113,6 +112,6 @@ export default createRoute((c) => {
         </section>
       </main>
     </div>,
-    { title: name }
+    { title: "井山梃子歴史館" }
   );
 });
