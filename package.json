@@ -11,7 +11,7 @@
   "dependencies": {
     "@hono/vite-ssg": "^0.1.0",
     "hono": "^4.0.6",
-    "honox": "^0.1.4"
+    "honox": "^0.1.16"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240208.0",
