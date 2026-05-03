@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Run PRAGMA table_xinfo for every table in a Cloudflare D1 database.
+# Skips _cf_KV (Cloudflare internal); remote queries return SQLITE_AUTH for it.
 # Usage:
 #   ./scripts/d1-table-xinfo-all.sh [database-name]
 # Env:
@@ -23,4 +24,4 @@ while IFS= read -r table; do
   npx wrangler d1 execute "${wrangler_d1_flags[@]}" "$DB_NAME" \
     --command "$(printf 'PRAGMA table_xinfo(%s);' "$(jq -rn --arg t "$table" '$t | @json')")" \
     --json | jq '.'
-done < <(echo "$list_json" | jq -r '.[0].results[] | select(.type == "table") | .name')
+done < <(echo "$list_json" | jq -r '.[0].results[] | select(.type == "table") | select(.name != "_cf_KV") | .name')
