@@ -1,0 +1,23 @@
+---
+description: >-
+  When editing comment search (Pages Functions, island UI, or remote API test
+  assets): load the comment-search-remote-api-test skill, keep success
+  conditions and the shell test in sync, confirm intent with the human if
+  contracts change, then run npm run test:comment-search:remote until green.
+globs: functions/api/comment-search*.ts,app/islands/CommentSearchResults.tsx,app/routes/comment-search/**,.cursor/skills/comment-search-remote-api-test/**,scripts/comment-search-remote-api-test.sh
+alwaysApply: false
+---
+
+# Comment search の変更時
+
+対象は主に `functions/api/comment-search*.ts`、`app/islands/CommentSearchResults.tsx`、`app/routes/comment-search/**`、および実 DB 検証用の `.cursor/skills/comment-search-remote-api-test/` と `scripts/comment-search-remote-api-test.sh`。
+
+0. **最初に** [.cursor/skills/comment-search-remote-api-test/SKILL.md](.cursor/skills/comment-search-remote-api-test/SKILL.md) を読み、その手順・成功条件を前提に作業する（必要ならチャットで `@comment-search-remote-api-test` 相当のスキルディレクトリを明示参照する）。
+
+1. 検索まわりを変えたら、スキル内の **成功条件表（A〜J）** がまだ正しいか必ず見直す。
+
+2. 契約（URL・クエリ・JSON 形・HTTP ステータス・UI 期待）が変わる可能性があるなら、**人間に意図した成功条件**を確認する。具体的な選択肢（例: 400 のままにする / 空結果を 404 にする / 新フィールドを必須にする など）を短く列挙して提案する。
+
+3. 合意した内容に合わせて **スキルの成功条件** と **`scripts/comment-search-remote-api-test.sh`**（および `package.json` の `test:comment-search:remote` があればそれ）を更新する。
+
+4. 変更後は **`npm run test:comment-search:remote`**（サンドボックス外・ネットワークありで）を実行して検証する。失敗したら、要件を満たす実装か／テスト側の期待が古いかを切り分け、必要なら 1〜3 に戻って繰り返す。

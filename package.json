@@ -5,6 +5,7 @@
     "dev": "vite",
     "build": "vite build --mode client && vite build",
     "preview": "wrangler pages dev ./dist --compatibility-date=2026-05-03",
+    "test:comment-search:remote": "bash ./scripts/comment-search-remote-api-test.sh",
     "deploy": "$npm_execpath run build && wrangler pages deploy ./dist --compatibility-date=2026-05-03"
   },
   "private": true,
