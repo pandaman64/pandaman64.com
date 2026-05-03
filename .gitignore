@@ -7,3 +7,5 @@ dist
 # Change them to your taste:
 wrangler.toml
 .direnv
+
+.cursor/*.log
