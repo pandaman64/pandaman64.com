@@ -1,8 +1,8 @@
+import ssg from "@hono/vite-ssg";
+import tailwindcss from "@tailwindcss/vite";
 import honox from "honox/vite";
 import client from "honox/vite/client";
 import { defineConfig } from "vite";
-// import pages from "@hono/vite-cloudflare-pages";
-import ssg from "@hono/vite-ssg";
 
 export default defineConfig(({ mode }) => {
   if (mode === "client") {
@@ -15,14 +15,14 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      plugins: [client()],
+      plugins: [client(), tailwindcss()],
     };
   } else {
     return {
       build: {
         emptyOutDir: false,
       },
-      plugins: [honox(), ssg({ entry: "./app/server.ts" })],
+      plugins: [honox(), ssg({ entry: "./app/server.ts" }), tailwindcss()],
     };
   }
 });

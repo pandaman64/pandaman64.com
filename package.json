@@ -4,22 +4,21 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --mode client && vite build",
-    "preview": "wrangler pages dev ./dist",
-    "deploy": "$npm_execpath run build && wrangler pages deploy ./dist"
+    "preview": "wrangler pages dev ./dist --compatibility-date=2026-05-03",
+    "deploy": "$npm_execpath run build && wrangler pages deploy ./dist --compatibility-date=2026-05-03"
   },
   "private": true,
   "dependencies": {
-    "@hono/vite-ssg": "^0.1.0",
-    "hono": "^4.0.6",
-    "honox": "^0.1.16"
+    "@hono/vite-ssg": "^0.3.3",
+    "hono": "^4.12.16",
+    "honox": "^0.1.55"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240208.0",
-    "@hono/vite-cloudflare-pages": "^0.2.4",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.0.12",
-    "wrangler": "^3.27.0"
+    "@cloudflare/workers-types": "^4.20260503.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.10",
+    "wrangler": "^4.87.0"
   }
 }
