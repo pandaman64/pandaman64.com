@@ -1,4 +1,5 @@
 import { createRoute } from "honox/factory";
+import CommentSearchResults from "../../islands/CommentSearchResults";
 
 const CHANNEL = "https://www.youtube.com/@SuimoriAtori";
 
@@ -36,7 +37,7 @@ export default createRoute((c) => {
           </button>
         </form>
 
-        {q}
+        <CommentSearchResults />
 
         <footer className="mt-auto pt-16 text-sm">
           <a
