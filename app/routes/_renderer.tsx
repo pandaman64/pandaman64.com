@@ -8,6 +8,7 @@ export default jsxRenderer(({ children, title }) => {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
         <title>{title}</title>
         {import.meta.env.PROD ? (
           <link rel="stylesheet" href="/static/assets/style.css" />
@@ -17,7 +18,9 @@ export default jsxRenderer(({ children, title }) => {
         <Script src="/app/client.ts" async />
         <Style />
       </head>
-      <body>{children}</body>
+      <body className="min-h-full">
+        {children}
+      </body>
     </html>
   );
 });
