@@ -1,4 +1,5 @@
 import { createRoute } from "honox/factory";
+import type { Child } from "hono/jsx";
 
 const Link = ({
   href,
@@ -6,7 +7,7 @@ const Link = ({
   outgoing,
 }: {
   href: string;
-  children?: JSX.Element | string;
+  children?: Child;
   outgoing: boolean;
 }) => {
   return (
@@ -38,9 +39,9 @@ export default createRoute((c) => {
         <section>
           <h2 className="text-2xl">Love</h2>
           <ul className="list-inside list-disc text-lg">
+            <li>Lean 4</li>
             <li>Rust</li>
             <li>梅</li>
-            <li>Lean 4</li>
             <li>
               <Link href="https://www.youtube.com/@UzukiKou" outgoing>
                 卯月コウ
@@ -49,6 +50,11 @@ export default createRoute((c) => {
             <li>
               <Link href="https://www.youtube.com/@YUKANAGASE" outgoing>
                 長瀬有花
+              </Link>
+            </li>
+            <li>
+              <Link href="https://www.youtube.com/@SuimoriAtori" outgoing>
+                翠森アトリ
               </Link>
             </li>
           </ul>
@@ -94,12 +100,6 @@ export default createRoute((c) => {
               𝕏:{" "}
               <Link href="https://twitter.com/__pandaman64__" outgoing>
                 __pandaman64__
-              </Link>
-            </li>
-            <li>
-              Misskey:{" "}
-              <Link href="https://misskey.io/@pandaman64" outgoing>
-                @pandaman64
               </Link>
             </li>
             <li>
