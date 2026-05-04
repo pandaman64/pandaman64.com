@@ -52,8 +52,10 @@ function formatOffset(offsetSec: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+const TIMESTAMP_LINK_LEAD_SEC = 10;
+
 function watchUrlWithT(videoId: string, offsetSec: number): string {
-  const t = Math.max(0, Math.floor(offsetSec));
+  const t = Math.max(0, Math.floor(offsetSec) - TIMESTAMP_LINK_LEAD_SEC);
   return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${t}s`;
 }
 
