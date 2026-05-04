@@ -8,8 +8,8 @@ export default createRoute((c) => {
 
   return c.render(
     <div className="min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-5 py-16">
-        <header className="mb-10">
+      <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-5 pt-4 pb-8">
+        <header className="mb-4">
           <h1 className="text-lg font-medium tracking-tight">翠森アトリコメント検索</h1>
         </header>
 
@@ -39,7 +39,7 @@ export default createRoute((c) => {
 
         <CommentSearchResults />
 
-        <footer className="mt-auto pt-16 text-sm">
+        <footer className="mt-auto pt-8 text-sm">
           <a
             href={CHANNEL}
             className="text-zinc-500 underline underline-offset-4 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
