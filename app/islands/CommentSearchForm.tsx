@@ -1,7 +1,13 @@
+import { useLayoutEffect, useState } from "hono/jsx";
+
 import { queryFromLocation } from "./comment-search-url";
 
 export default function CommentSearchForm() {
-  const effectiveQuery = queryFromLocation();
+  const [q, setQ] = useState(queryFromLocation());
+
+  useLayoutEffect(() => {
+    setQ(queryFromLocation());
+  }, []);
 
   return (
     <form className="flex flex-col gap-4" method="get" action="" role="search" aria-label="コメント検索">
@@ -10,7 +16,11 @@ export default function CommentSearchForm() {
           id="q"
           type="search"
           name="q"
-          defaultValue={effectiveQuery}
+          value={q}
+          onInput={(e) => {
+            const el = e.currentTarget as HTMLInputElement | null;
+            if (el) setQ(el.value);
+          }}
           placeholder="コメントを検索"
           aria-label="キーワード"
           autoComplete="off"
