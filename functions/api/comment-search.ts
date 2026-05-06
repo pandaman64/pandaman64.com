@@ -32,7 +32,7 @@ export async function onRequestGet(context: {
          ci.video_id,
          COALESCE(v.title, ci.video_id) AS title,
          COALESCE(
-           CAST(v.timestamp AS INTEGER),
+           CAST(vm.release_timestamp AS INTEGER),
            CAST(MAX(ci.timestamp_usec / 1000000) AS INTEGER)
          ) AS video_timestamp,
          COALESCE(
@@ -43,12 +43,14 @@ export async function onRequestGet(context: {
        FROM chat_items ci
        INNER JOIN videos v
          ON v.video_id = ci.video_id AND v.channel_id = ?
+       LEFT JOIN video_metadata vm
+         ON vm.video_id = ci.video_id AND vm.channel_id = ?
        WHERE INSTR(LOWER(ci.message), LOWER(?)) > 0
        GROUP BY ci.video_id
-       ORDER BY video_timestamp DESC, ci.video_id DESC
+       ORDER BY vm.release_timestamp DESC, video_timestamp DESC, ci.video_id DESC
        LIMIT ?`
     )
-    .bind(CHANNEL_ID, q, limit);
+    .bind(CHANNEL_ID, CHANNEL_ID, q, limit);
 
   const { results } = await stmt.all<Row>();
   return Response.json({

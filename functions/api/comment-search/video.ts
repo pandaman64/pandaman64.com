@@ -48,18 +48,22 @@ export async function onRequestGet(context: {
       `SELECT
          COALESCE(v.title, v.video_id) AS title,
          COALESCE(
-           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER),
-           CAST(v.timestamp AS INTEGER)
+           CAST(vm.release_timestamp AS INTEGER),
+           CAST(vm.timestamp AS INTEGER),
+           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER)
          ) AS video_timestamp,
          COALESCE(
-           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER),
-           CAST(v.timestamp AS INTEGER)
+           CAST(vm.timestamp AS INTEGER),
+           CAST(vm.release_timestamp AS INTEGER),
+           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER)
          ) AS video_start_unix_sec,
          COALESCE(
            json_extract(v.thumbnails, '$[0].url'),
            'https://i.ytimg.com/vi/' || v.video_id || '/hqdefault.jpg'
          ) AS thumbnail_url
        FROM videos v
+       LEFT JOIN video_metadata vm
+         ON vm.video_id = v.video_id AND vm.channel_id = v.channel_id
        WHERE v.video_id = ? AND v.channel_id = ?`
     )
     .bind(videoId, CHANNEL_ID);
