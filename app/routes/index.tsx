@@ -75,11 +75,10 @@ export default createRoute((c) => {
               : fan site for 卯月コウ
             </li>
             <li>
-              <Link href="https://github.com/pandaman64/novelviewer" outgoing>
-                Novelviewer
+              <Link href="/comment-search/@SuimoriAtori" outgoing={false}>
+                翠森アトリコメント検索
               </Link>
-              : image viewer and search engine for AI-generated images, written
-              in Rust with Tauri
+              : Indexed substring search for live stream comments from the 翠森アトリ channel
             </li>
           </ul>
         </section>
