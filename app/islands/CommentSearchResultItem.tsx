@@ -1,28 +1,14 @@
 import { useRef, useState } from "hono/jsx";
 
-export type Hit = {
-  video_id: string;
-  title: string;
-  video_timestamp: number | null;
-  thumbnail_url: string;
-  comment_count: number;
-};
+import { fetchCommentVideoDetail } from "./comment-search-client";
+import type { Hit } from "./comment-search-types";
+import type { CommentSearchSource } from "./comment-search-url";
+
+export type { Hit } from "./comment-search-types";
 
 type CommentLine = {
   offset_sec: number;
   message: string;
-};
-
-type VideoApiBody = {
-  query: string;
-  video_id: string;
-  video: {
-    title: string;
-    video_timestamp: number | null;
-    thumbnail_url: string;
-  } | null;
-  comments: CommentLine[];
-  limit: number;
 };
 
 type VideoDetailState =
@@ -62,9 +48,10 @@ function watchUrlWithT(videoId: string, offsetSec: number): string {
 type Props = {
   hit: Hit;
   query: string;
+  src: CommentSearchSource;
 };
 
-export default function CommentSearchResultItem({ hit, query }: Props) {
+export default function CommentSearchResultItem({ hit, query, src }: Props) {
   const [detail, setDetail] = useState<VideoDetailState | null>(null);
   const fetchedKeyRef = useRef<string | null>(null);
   const inFlightKeyRef = useRef<string | null>(null);
@@ -77,22 +64,17 @@ export default function CommentSearchResultItem({ hit, query }: Props) {
         if (!el.open) return;
         const q = query.trim();
         const vid = hit.video_id;
-        const detailKey = `${vid}\t${q}`;
+        const detailKey = `${vid}\t${q}\t${src}`;
         if (fetchedKeyRef.current === detailKey) return;
         if (inFlightKeyRef.current === detailKey) return;
 
         inFlightKeyRef.current = detailKey;
         setDetail({ kind: "loading" });
 
-        const params = new URLSearchParams({ video_id: vid, q });
-        fetch(`/api/comment-search/video?${params}`)
-          .then(async (r) => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json() as Promise<VideoApiBody>;
-          })
-          .then((data) => {
+        fetchCommentVideoDetail(vid, q, src)
+          .then((comments) => {
             fetchedKeyRef.current = detailKey;
-            setDetail({ kind: "ok", comments: data.comments ?? [] });
+            setDetail({ kind: "ok", comments });
           })
           .catch((err: unknown) => {
             const msg = err instanceof Error ? err.message : String(err);

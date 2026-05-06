@@ -4,13 +4,16 @@ description: >-
   assets): load the comment-search-remote-api-test skill, keep success
   conditions and the shell test in sync, confirm intent with the human if
   contracts change, then run npm run test:comment-search:remote until green.
-globs: functions/api/comment-search*.ts,app/islands/CommentSearchResults.tsx,app/routes/comment-search/**,.cursor/skills/comment-search-remote-api-test/**,scripts/comment-search-remote-api-test.sh
+globs: functions/api/comment-search*.ts,app/islands/CommentSearch*.tsx,app/islands/comment-search-*.ts,app/routes/comment-search/**,.cursor/skills/comment-search-remote-api-test/**,scripts/comment-search-remote-api-test.sh
 alwaysApply: false
 ---
 
 # Comment search の変更時
 
-対象は主に `functions/api/comment-search*.ts`、`app/islands/CommentSearchResults.tsx`、`app/routes/comment-search/**`、および実 DB 検証用の `.cursor/skills/comment-search-remote-api-test/` と `scripts/comment-search-remote-api-test.sh`。
+対象は主に `functions/api/comment-search*.ts`、`app/islands/CommentSearch*.tsx`、`app/islands/comment-search-*.ts`（`?src=fly|cf|race`・Fly 正規化）、`app/routes/comment-search/**`、および実 DB 検証用の `.cursor/skills/comment-search-remote-api-test/` と `scripts/comment-search-remote-api-test.sh`。
+
+- **データソース**: ページのクエリ `src`（未指定は **fly**）。`VITE_COMMENT_SEARCH_API_BASE` で Fly のオリジンを上書き可（未設定時はクライアントが `https://comment-search.fly.dev` を既定にする）。
+- **CF と Fly の差**: CF は翠森 `CHANNEL_ID` で JOIN 限定；Fly はチャンネル条件なし。検索はどちらも case-sensitive 寄り（CF は `INSTR(message, q)`）。
 
 0. **最初に** [.cursor/skills/comment-search-remote-api-test/SKILL.md](.cursor/skills/comment-search-remote-api-test/SKILL.md) を読み、その手順・成功条件を前提に作業する（必要ならチャットで `@comment-search-remote-api-test` 相当のスキルディレクトリを明示参照する）。
 

@@ -15,7 +15,7 @@ description: >-
 
 ## 目的
 
-[`app/islands/CommentSearchResults.tsx`](../../../app/islands/CommentSearchResults.tsx) が呼ぶ次の API が、**実 D1 `comment-search`（remote）** に向いた `wrangler pages dev` 上で期待どおり動くことを、**コマンドラインだけで検証**する。終了時は **preview プロセスの停止とポート解放**まで必ず行う。
+[`app/islands/CommentSearchResults.tsx`](../../../app/islands/CommentSearchResults.tsx) は URL の `?src=fly|cf|race` でデータソースを切り替える（**未指定は fly**；Fly のオリジンは `VITE_COMMENT_SEARCH_API_BASE` または既定 `https://comment-search.fly.dev`）。**このスクリプトが検証するのは Cloudflare の `/api/comment-search*`（ブラウザで `src=cf` としたときと同じ経路）だけ**であり、**実 D1 `comment-search`（remote）** に向いた `wrangler pages dev` 上で動くことを **コマンドラインだけで確認**する。終了時は **preview プロセスの停止とポート解放**まで必ず行う。
 
 ## 成功条件（すべて満たすこと）
 

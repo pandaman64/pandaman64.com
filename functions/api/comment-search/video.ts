@@ -21,11 +21,6 @@ export async function onRequestGet(context: {
   const url = new URL(context.request.url);
   const videoId = url.searchParams.get("video_id")?.trim() ?? "";
   const q = url.searchParams.get("q")?.trim() ?? "";
-  const limitRaw = url.searchParams.get("limit");
-  const limit = Math.min(
-    500,
-    Math.max(1, Number.parseInt(limitRaw ?? "200", 10) || 200)
-  );
 
   if (!videoId) {
     return Response.json({ error: "video_id is required" }, { status: 400 });
@@ -39,7 +34,6 @@ export async function onRequestGet(context: {
       video_id: videoId,
       video: null as VideoRow | null,
       comments: [] as { offset_sec: number; message: string }[],
-      limit,
     });
   }
 
@@ -48,18 +42,22 @@ export async function onRequestGet(context: {
       `SELECT
          COALESCE(v.title, v.video_id) AS title,
          COALESCE(
-           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER),
-           CAST(v.timestamp AS INTEGER)
+           CAST(vm.release_timestamp AS INTEGER),
+           CAST(vm.timestamp AS INTEGER),
+           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER)
          ) AS video_timestamp,
          COALESCE(
-           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER),
-           CAST(v.timestamp AS INTEGER)
+           CAST(vm.timestamp AS INTEGER),
+           CAST(vm.release_timestamp AS INTEGER),
+           CAST(json_extract(v.flat_entry_jsonb, '$.timestamp') AS INTEGER)
          ) AS video_start_unix_sec,
          COALESCE(
            json_extract(v.thumbnails, '$[0].url'),
            'https://i.ytimg.com/vi/' || v.video_id || '/hqdefault.jpg'
          ) AS thumbnail_url
        FROM videos v
+       LEFT JOIN video_metadata vm
+         ON vm.video_id = v.video_id AND vm.channel_id = v.channel_id
        WHERE v.video_id = ? AND v.channel_id = ?`
     )
     .bind(videoId, CHANNEL_ID);
@@ -71,7 +69,6 @@ export async function onRequestGet(context: {
       video_id: videoId,
       video: null,
       comments: [] as { offset_sec: number; message: string }[],
-      limit,
     });
   }
 
@@ -85,11 +82,10 @@ export async function onRequestGet(context: {
        INNER JOIN videos v
          ON v.video_id = ci.video_id AND v.channel_id = ?
        WHERE ci.video_id = ?
-         AND INSTR(LOWER(ci.message), LOWER(?)) > 0
-       ORDER BY time_in_seconds ASC, ci.timestamp_usec ASC
-       LIMIT ?`
+         AND INSTR(ci.message, ?) > 0
+       ORDER BY ci.timestamp_usec ASC`
     )
-    .bind(CHANNEL_ID, videoId, q, limit);
+    .bind(CHANNEL_ID, videoId, q);
 
   const { results: commentResults } = await commentsStmt.all<CommentRow>();
   const rows = commentResults ?? [];
@@ -109,6 +105,5 @@ export async function onRequestGet(context: {
     video_id: videoId,
     video: videoRow,
     comments,
-    limit,
   });
 }

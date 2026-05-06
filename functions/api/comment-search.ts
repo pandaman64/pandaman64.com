@@ -1,4 +1,4 @@
-/** 翠森アトリ（@SuimoriAtori）チャンネル — chat_items.message・videos の title/timestamp/thumbnails 生成列を利用した部分一致検索（大文字小文字区別なし） */
+/** 翠森アトリ（@SuimoriAtori）チャンネル — case-sensitive substring（INSTR）；チャンネル限定 */
 const CHANNEL_ID = "UCIQsiulMw70eRex4cXRAx2A";
 
 type Row = {
@@ -15,14 +15,9 @@ export async function onRequestGet(context: {
 }): Promise<Response> {
   const url = new URL(context.request.url);
   const q = url.searchParams.get("q")?.trim() ?? "";
-  const limitRaw = url.searchParams.get("limit");
-  const limit = Math.min(
-    100,
-    Math.max(1, Number.parseInt(limitRaw ?? "30", 10) || 30)
-  );
 
   if (!q) {
-    return Response.json({ query: "", results: [] as Row[], limit });
+    return Response.json({ query: "", results: [] as Row[] });
   }
 
   const db = context.env.COMMENT_SEARCH_DB;
@@ -32,7 +27,7 @@ export async function onRequestGet(context: {
          ci.video_id,
          COALESCE(v.title, ci.video_id) AS title,
          COALESCE(
-           CAST(v.timestamp AS INTEGER),
+           CAST(vm.release_timestamp AS INTEGER),
            CAST(MAX(ci.timestamp_usec / 1000000) AS INTEGER)
          ) AS video_timestamp,
          COALESCE(
@@ -43,17 +38,17 @@ export async function onRequestGet(context: {
        FROM chat_items ci
        INNER JOIN videos v
          ON v.video_id = ci.video_id AND v.channel_id = ?
-       WHERE INSTR(LOWER(ci.message), LOWER(?)) > 0
+       LEFT JOIN video_metadata vm
+         ON vm.video_id = ci.video_id AND vm.channel_id = ?
+       WHERE INSTR(ci.message, ?) > 0
        GROUP BY ci.video_id
-       ORDER BY video_timestamp DESC, ci.video_id DESC
-       LIMIT ?`
+       ORDER BY vm.release_timestamp DESC, ci.video_id DESC`
     )
-    .bind(CHANNEL_ID, q, limit);
+    .bind(CHANNEL_ID, CHANNEL_ID, q);
 
   const { results } = await stmt.all<Row>();
   return Response.json({
     query: q,
     results: results ?? [],
-    limit,
   });
 }
