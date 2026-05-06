@@ -21,11 +21,6 @@ export async function onRequestGet(context: {
   const url = new URL(context.request.url);
   const videoId = url.searchParams.get("video_id")?.trim() ?? "";
   const q = url.searchParams.get("q")?.trim() ?? "";
-  const limitRaw = url.searchParams.get("limit");
-  const limit = Math.min(
-    500,
-    Math.max(1, Number.parseInt(limitRaw ?? "200", 10) || 200)
-  );
 
   if (!videoId) {
     return Response.json({ error: "video_id is required" }, { status: 400 });
@@ -39,7 +34,6 @@ export async function onRequestGet(context: {
       video_id: videoId,
       video: null as VideoRow | null,
       comments: [] as { offset_sec: number; message: string }[],
-      limit,
     });
   }
 
@@ -75,7 +69,6 @@ export async function onRequestGet(context: {
       video_id: videoId,
       video: null,
       comments: [] as { offset_sec: number; message: string }[],
-      limit,
     });
   }
 
@@ -89,11 +82,10 @@ export async function onRequestGet(context: {
        INNER JOIN videos v
          ON v.video_id = ci.video_id AND v.channel_id = ?
        WHERE ci.video_id = ?
-         AND INSTR(LOWER(ci.message), LOWER(?)) > 0
-       ORDER BY time_in_seconds ASC, ci.timestamp_usec ASC
-       LIMIT ?`
+         AND INSTR(ci.message, ?) > 0
+       ORDER BY ci.timestamp_usec ASC`
     )
-    .bind(CHANNEL_ID, videoId, q, limit);
+    .bind(CHANNEL_ID, videoId, q);
 
   const { results: commentResults } = await commentsStmt.all<CommentRow>();
   const rows = commentResults ?? [];
@@ -113,6 +105,5 @@ export async function onRequestGet(context: {
     video_id: videoId,
     video: videoRow,
     comments,
-    limit,
   });
 }

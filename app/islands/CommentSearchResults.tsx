@@ -1,18 +1,28 @@
 import { useEffect, useState } from "hono/jsx";
 
-import CommentSearchResultItem, {
-  type Hit,
-} from "./CommentSearchResultItem";
-import { queryFromLocation } from "./comment-search-url";
-
-type ListApiBody = { query: string; results: Hit[]; limit?: number };
+import { fetchCommentSearchList } from "./comment-search-client";
+import CommentSearchResultItem from "./CommentSearchResultItem";
+import type { Hit } from "./comment-search-types";
+import {
+  dataSourceFromLocation,
+  queryFromLocation,
+} from "./comment-search-url";
 
 export default function CommentSearchResults() {
   const [results, setResults] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Re-render on browser back/forward so URL `src` / `q` refresh. */
+  const [urlTick, setUrlTick] = useState(0);
+
+  useEffect(() => {
+    const onPop = () => setUrlTick((n) => n + 1);
+    globalThis.window?.addEventListener("popstate", onPop);
+    return () => globalThis.window?.removeEventListener("popstate", onPop);
+  }, []);
 
   const effectiveQuery = queryFromLocation();
+  const effectiveSrc = dataSourceFromLocation();
 
   useEffect(() => {
     const q = effectiveQuery.trim();
@@ -26,13 +36,9 @@ export default function CommentSearchResults() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/comment-search?${new URLSearchParams({ q })}`)
-      .then(async (r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json() as Promise<ListApiBody>;
-      })
-      .then((data) => {
-        if (!cancelled) setResults(data.results ?? []);
+    fetchCommentSearchList(q, effectiveSrc)
+      .then((hits) => {
+        if (!cancelled) setResults(hits);
       })
       .catch((e: unknown) => {
         if (!cancelled)
@@ -45,7 +51,7 @@ export default function CommentSearchResults() {
     return () => {
       cancelled = true;
     };
-  }, [effectiveQuery]);
+  }, [effectiveQuery, effectiveSrc, urlTick]);
 
   if (!effectiveQuery.trim()) {
     return null;
@@ -89,7 +95,11 @@ export default function CommentSearchResults() {
       <ul className="flex flex-col gap-3">
         {results.map((row) => (
           <li key={`${row.video_id}\t${qTrim}`}>
-            <CommentSearchResultItem hit={row} query={effectiveQuery} />
+            <CommentSearchResultItem
+              hit={row}
+              query={effectiveQuery}
+              src={effectiveSrc}
+            />
           </li>
         ))}
       </ul>

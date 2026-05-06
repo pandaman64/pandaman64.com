@@ -1,16 +1,27 @@
 import { useLayoutEffect, useState } from "hono/jsx";
 
-import { queryFromLocation } from "./comment-search-url";
+import {
+  dataSourceFromLocation,
+  queryFromLocation,
+  type CommentSearchSource,
+} from "./comment-search-url";
 
 export default function CommentSearchForm() {
   const [q, setQ] = useState(queryFromLocation());
+  const [src, setSrc] = useState<CommentSearchSource>(
+    typeof globalThis.window !== "undefined"
+      ? dataSourceFromLocation()
+      : "fly"
+  );
 
   useLayoutEffect(() => {
     setQ(queryFromLocation());
+    setSrc(dataSourceFromLocation());
   }, []);
 
   return (
     <form className="flex flex-col gap-4" method="get" action="" role="search" aria-label="コメント検索">
+      <input type="hidden" name="src" value={src} />
       <div className="flex flex-col gap-2">
         <input
           id="q"
